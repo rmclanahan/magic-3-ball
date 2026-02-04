@@ -9,7 +9,7 @@ import streamlit as st
 # -----------------------------
 st.set_page_config(
     page_title="Magic 3 Ball — Fun Teaching Ideas",
-    page_icon="✨",
+    page_icon="🔮",
     layout="wide",
 )
 
