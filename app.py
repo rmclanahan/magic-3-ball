@@ -144,7 +144,7 @@ except Exception:
 
 # Centered CTA
 st.markdown('<div class="cta-wrap">', unsafe_allow_html=True)
-clicked = st.button("✨ Ask the Magic 3 Ball", disabled=(df is None))
+clicked = st.button("🔮 Ask the Magic 3 Ball", disabled=(df is None))
 st.markdown("</div>", unsafe_allow_html=True)
 
 st.caption("Click again for a fresh set of three ideas.")
