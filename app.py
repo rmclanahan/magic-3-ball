@@ -9,7 +9,7 @@ import streamlit as st
 # -----------------------------
 st.set_page_config(
     page_title="Magic 3 Ball — Fun Teaching Ideas",
-    page_icon="✨",  # removed magic 8 ball vibe
+    page_icon="✨",
     layout="wide",
 )
 
@@ -26,46 +26,40 @@ TEAM_CRESCENDO_URL = "https://docs.google.com/document/d/1SXUH7tqaHU8ixkpBiJlWOC
 
 
 # -----------------------------
-# Styling (simple, modern, readable)
+# Styling
 # -----------------------------
 st.markdown(
     """
 <style>
-/* Layout */
 .block-container { padding-top: 2.2rem; max-width: 1100px; }
 
-/* Hero */
 .hero {
-  padding: 1.25rem 1.25rem 1rem 1.25rem;
+  padding: 1.25rem;
   border-radius: 18px;
   border: 1px solid rgba(255,255,255,0.10);
   background: rgba(255,255,255,0.03);
   margin-bottom: 1.2rem;
 }
-.hero h1 { margin: 0 0 0.35rem 0; font-size: 2.1rem; }
-.hero p  { margin: 0; opacity: 0.85; font-size: 1.05rem; line-height: 1.45; }
+.hero h1 { margin: 0 0 0.4rem 0; font-size: 2.1rem; }
+.hero p  { margin: 0; opacity: 0.85; font-size: 1.05rem; }
 
-/* Centered big button container */
 .cta-wrap {
   display: flex;
   justify-content: center;
-  margin: 0.25rem 0 0.25rem 0;
+  margin: 0.5rem 0;
 }
 
-/* Make the Streamlit button visually prominent */
 div.stButton > button {
   width: min(680px, 100%);
-  padding: 1.1rem 1.25rem;
+  padding: 1.15rem;
   font-size: 1.15rem;
   font-weight: 650;
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.18);
 }
 
-/* Cards */
 .card {
   border-radius: 18px;
-  padding: 1.05rem 1.1rem;
+  padding: 1.1rem;
   border: 1px solid rgba(255,255,255,0.10);
   background: rgba(255,255,255,0.03);
   box-shadow: 0 6px 18px rgba(0,0,0,0.18);
@@ -73,29 +67,18 @@ div.stButton > button {
 }
 .badge {
   display: inline-block;
-  padding: 0.18rem 0.55rem;
+  padding: 0.2rem 0.6rem;
   border-radius: 999px;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
+  margin-bottom: 0.6rem;
   border: 1px solid rgba(255,255,255,0.16);
-  opacity: 0.9;
-  margin-bottom: 0.55rem;
 }
-.card h3 {
-  margin: 0.2rem 0 0.55rem 0;
-  font-size: 1.22rem;
-  line-height: 1.25;
-}
-.card p {
-  margin: 0;
-  opacity: 0.92;
-  line-height: 1.45;
-  font-size: 1.0rem;
-}
+.card h3 { margin: 0.2rem 0 0.55rem 0; font-size: 1.22rem; }
+.card p  { margin: 0; line-height: 1.45; }
 
-/* Footer links area */
 .footer {
-  margin-top: 1.3rem;
-  padding: 1rem 1.1rem;
+  margin-top: 1.4rem;
+  padding: 1rem;
   border-radius: 18px;
   border: 1px solid rgba(255,255,255,0.10);
   background: rgba(255,255,255,0.02);
@@ -103,7 +86,6 @@ div.stButton > button {
 .footer-title {
   font-weight: 600;
   margin-bottom: 0.75rem;
-  opacity: 0.92;
 }
 </style>
 """,
@@ -114,54 +96,100 @@ div.stButton > button {
 # -----------------------------
 # Data loading (cached)
 # -----------------------------
-@st.cache_data(ttl=60 * 30)  # refresh every 30 minutes
+@st.cache_data(ttl=60 * 30)
 def load_activities(csv_url: str) -> pd.DataFrame:
-    """
-    Loads the public Google Sheet as CSV.
-    Sheet has NO header row:
-      col 0 = activity name
-      col 1 = concept (1–2 sentences)
-    """
     df = pd.read_csv(csv_url, header=None, dtype=str, keep_default_na=False)
 
     if df.shape[1] < 2:
-        raise ValueError("Sheet must have at least 2 columns (name, concept).")
+        raise ValueError("Sheet must have at least two columns.")
 
-    df = df.iloc[:, :2].copy()
+    df = df.iloc[:, :2]
     df.columns = ["name", "concept"]
 
-    # Drop completely empty rows (just in case)
     df = df[(df["name"].str.strip() != "") | (df["concept"].str.strip() != "")]
-    df = df.reset_index(drop=True)
+    df.reset_index(drop=True, inplace=True)
 
-    if len(df) == 0:
-        raise ValueError("Sheet appears empty.")
+    if len(df) < 3:
+        raise ValueError("Not enough activities in the sheet.")
+
     return df
 
 
 def draw_three(n: int) -> list[int]:
-    """Returns 3 unique 1-based indices from 1..n."""
-    if n < 3:
-        raise ValueError("Need at least 3 activities to draw from.")
     return sorted(random.sample(range(1, n + 1), 3))
 
 
 # -----------------------------
-# App UI
+# UI
 # -----------------------------
 st.markdown(
     """
 <div class="hero">
   <h1>Magic 3 Ball of Fun Teaching Ideas</h1>
-  <p>
-    Click the button to get <b>three</b> engagement activities—fast, playful, and ready to use.
-  </p>
+  <p>Click once to get three engagement activities you can use right away.</p>
 </div>
 """,
     unsafe_allow_html=True,
 )
 
-# Try to load data; show a friendly fallback if it fails
+# Safe load with proper try/except
 df = None
 try:
-    df = load_ac_
+    df = load_activities(SHEET_CSV_URL)
+except Exception:
+    st.error(
+        "I couldn’t load the activity list right now. "
+        "Please refresh the page or open the full sheet below."
+    )
+
+# Centered CTA
+st.markdown('<div class="cta-wrap">', unsafe_allow_html=True)
+clicked = st.button("✨ Ask the Magic 3 Ball", disabled=(df is None))
+st.markdown("</div>", unsafe_allow_html=True)
+
+st.caption("Click again for a fresh set of three ideas.")
+st.divider()
+
+if df is not None:
+    if "last_draw" not in st.session_state:
+        st.session_state.last_draw = None
+
+    if clicked:
+        with st.spinner("Choosing your ideas..."):
+            time.sleep(0.6)
+        st.session_state.last_draw = draw_three(len(df))
+
+    if st.session_state.last_draw:
+        cols = st.columns(3)
+        for col, n in zip(cols, st.session_state.last_draw):
+            row = df.iloc[n - 1]
+            col.markdown(
+                f"""
+<div class="card">
+  <div class="badge">#{n} of {len(df)}</div>
+  <h3>{row["name"] or "Untitled activity"}</h3>
+  <p>{row["concept"] or "No description provided."}</p>
+</div>
+""",
+                unsafe_allow_html=True,
+            )
+    else:
+        st.info("Click **Ask the Magic 3 Ball** to get your first three ideas.")
+
+# Footer
+st.markdown(
+    """
+<div class="footer">
+  <div class="footer-title">More resources</div>
+</div>
+""",
+    unsafe_allow_html=True,
+)
+
+l1, l2, l3 = st.columns(3)
+with l1:
+    st.link_button("View the full list (Google Sheet)", SHEET_URL, use_container_width=True)
+with l2:
+    st.link_button("Methodology (Engineering Unleashed)", ENG_UNLEASHED_URL, use_container_width=True)
+with l3:
+    st.link_button("Request Team Crescendo faculty development", TEAM_CRESCENDO_URL, use_container_width=True)
