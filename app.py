@@ -9,7 +9,7 @@ import streamlit as st
 # -----------------------------
 st.set_page_config(
     page_title="Magic 3 Ball — Fun Teaching Ideas",
-    page_icon="🎱",
+    page_icon="✨",  # removed magic 8 ball vibe
     layout="wide",
 )
 
@@ -19,7 +19,6 @@ st.set_page_config(
 # -----------------------------
 SHEET_ID = "1bFxAg0LqkC22Uc8FQxWoTNtJ8k-GBDy715E6YHy8r3I"
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1bFxAg0LqkC22Uc8FQxWoTNtJ8k-GBDy715E6YHy8r3I/edit?usp=sharing"
-# Public CSV export of the *first sheet/tab*. If you later need a specific tab, we can add gid=...
 SHEET_CSV_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv"
 
 ENG_UNLEASHED_URL = "https://engineeringunleashed.com/card/36"
@@ -32,7 +31,7 @@ TEAM_CRESCENDO_URL = "https://docs.google.com/document/d/1SXUH7tqaHU8ixkpBiJlWOC
 st.markdown(
     """
 <style>
-/* Tighten the top padding a bit */
+/* Layout */
 .block-container { padding-top: 2.2rem; max-width: 1100px; }
 
 /* Hero */
@@ -46,12 +45,20 @@ st.markdown(
 .hero h1 { margin: 0 0 0.35rem 0; font-size: 2.1rem; }
 .hero p  { margin: 0; opacity: 0.85; font-size: 1.05rem; line-height: 1.45; }
 
-/* Big button */
+/* Centered big button container */
+.cta-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 0.25rem 0 0.25rem 0;
+}
+
+/* Make the Streamlit button visually prominent */
 div.stButton > button {
-  width: 100%;
-  padding: 0.95rem 1rem;
-  font-size: 1.05rem;
-  border-radius: 14px;
+  width: min(680px, 100%);
+  padding: 1.1rem 1.25rem;
+  font-size: 1.15rem;
+  font-weight: 650;
+  border-radius: 16px;
   border: 1px solid rgba(255,255,255,0.18);
 }
 
@@ -116,10 +123,10 @@ def load_activities(csv_url: str) -> pd.DataFrame:
       col 1 = concept (1–2 sentences)
     """
     df = pd.read_csv(csv_url, header=None, dtype=str, keep_default_na=False)
-    # Ensure at least 2 columns
+
     if df.shape[1] < 2:
         raise ValueError("Sheet must have at least 2 columns (name, concept).")
-    # Keep only first two columns in case there are extras
+
     df = df.iloc[:, :2].copy()
     df.columns = ["name", "concept"]
 
@@ -145,7 +152,7 @@ def draw_three(n: int) -> list[int]:
 st.markdown(
     """
 <div class="hero">
-  <h1>🎱 Magic 3 Ball of Fun Teaching Ideas</h1>
+  <h1>Magic 3 Ball of Fun Teaching Ideas</h1>
   <p>
     Click the button to get <b>three</b> engagement activities—fast, playful, and ready to use.
   </p>
@@ -157,70 +164,4 @@ st.markdown(
 # Try to load data; show a friendly fallback if it fails
 df = None
 try:
-    df = load_activities(SHEET_CSV_URL)
-except Exception:
-    st.error(
-        "I couldn’t load the activity list right now. Please refresh and try again.\n\n"
-        "If it keeps happening, open the full sheet using the link below."
-    )
-
-# Main interaction
-colA, colB = st.columns([1.2, 1])
-with colA:
-    clicked = st.button("✨ Ask the Magic 3 Ball", disabled=(df is None))
-
-with colB:
-    st.caption("Tip: click again for a fresh set of 3 ideas.")
-
-st.divider()
-
-if df is not None:
-    if "last_draw" not in st.session_state:
-        st.session_state.last_draw = None
-
-    if clicked:
-        with st.spinner("Shaking the Magic 3 Ball..."):
-            time.sleep(0.6)  # tiny “magic” pause
-        st.session_state.last_draw = draw_three(len(df))
-
-    if st.session_state.last_draw:
-        nums = st.session_state.last_draw
-
-        c1, c2, c3 = st.columns(3)
-        cols = [c1, c2, c3]
-
-        for i, n in enumerate(nums):
-            row = df.iloc[n - 1]
-            name = str(row["name"]).strip()
-            concept = str(row["concept"]).strip()
-
-            cols[i].markdown(
-                f"""
-<div class="card">
-  <div class="badge">#{n} of {len(df)}</div>
-  <h3>{name if name else "Untitled activity"}</h3>
-  <p>{concept if concept else "No description provided in the sheet."}</p>
-</div>
-""",
-                unsafe_allow_html=True,
-            )
-    else:
-        st.info("Click **Ask the Magic 3 Ball** to get your first 3 ideas.")
-
-# Footer links
-st.markdown(
-    """
-<div class="footer">
-  <div class="footer-title">More resources</div>
-</div>
-""",
-    unsafe_allow_html=True,
-)
-
-l1, l2, l3 = st.columns(3)
-with l1:
-    st.link_button("📚 View the full list (Google Sheet)", SHEET_URL, use_container_width=True)
-with l2:
-    st.link_button("🧠 Methodology (Engineering Unleashed)", ENG_UNLEASHED_URL, use_container_width=True)
-with l3:
-    st.link_button("🎓 Request Team Crescendo faculty development", TEAM_CRESCENDO_URL, use_container_width=True)
+    df = load_ac_
