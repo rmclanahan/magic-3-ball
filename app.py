@@ -222,6 +222,6 @@ r1, r2, r3 = st.columns(3)
 with r1:
     st.link_button("Full list (Google Sheet)", SHEET_URL, use_container_width=True)
 with r2:
-    st.link_button("Methodology (Engineering Unleashed)", ENG_UNLEASHED_URL, use_container_width=True)
+    st.link_button("Methodology", ENG_UNLEASHED_URL, use_container_width=True)
 with r3:
-    st.link_button("Team Crescendo (Complimentary on-campus faculty development)", TEAM_CRESCENDO_URL, use_container_width=True)
+    st.link_button("Crescendo - Complimentary faculty development", TEAM_CRESCENDO_URL, use_container_width=True)
